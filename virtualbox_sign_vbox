@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+# @author Zeus Intuivo <zeus@intuivo.com>
+#
+#
+
+cd /home/zeus
+
+sudo dnf install gcc kernel-devel akmods
+wait
+sudo modprobe -v vboxdrv
+wait
+openssl req -new -x509 -newkey rsa:2048 -keyout MOK.priv -outform DER -out MOK.der -nodes -days 36500 -subj "/CN=Akrog/"
+wait
+for f in $(dirname $(modinfo -n vboxdrv))/*.ko; do echo "Signing $f"; sudo /usr/src/kernels/$(uname -r)/scripts/sign-file sha256 ./MOK.priv ./MOK.der $f; done
+wait
+sudo find /boot -name MokManager.efi
+wait
+sudo mokutil --import MOK.der
+wait
+echo reboot now 
+wait
+
